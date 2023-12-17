@@ -1,5 +1,6 @@
 {
     "port": "COM3",
     "board": "arduino:avr:uno",
-    "programmer": "avrisp"
+    "programmer": "avrisp",
+    "sketch": "LedLightMeter.ino"
 }
