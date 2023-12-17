@@ -4,7 +4,7 @@ A physical slotted metal sheet will slide past an LED light, allowing a sliver o
 The duration of time in which the photoresistor notices the light will be passed onto the PC via USB connection.
 */
 
-#define DEBUG false // false is Debug off, true is Debug on
+#define DEBUG false // DEBUG false is Debug off, DEBUG true is Debug on
 
 #if DEBUG == true
 #define debug(x) Serial.print(x)
@@ -63,7 +63,7 @@ void loop()
 
   if (value <= threshold && isThresholdTriggered)
   {
-    duration = millis() - startTime;
+    duration = max(millis() - startTime, 20); // sets duration to at least 20 millis
     isThresholdTriggered = false;
     DoSendMessage(duration); // Serial.println goes to PC
   }
@@ -71,6 +71,6 @@ void loop()
 
 void DoSendMessage(unsigned long time)
 {
-  Serial.println(time); // updates duration and outputs it to PC
+  Serial.println(time); // updates duration in milliseconds and outputs it to PC
   debugln("Updating count to PC");
 }
