@@ -18,6 +18,8 @@ const int pResistor = A0; // Photoresistor at Arduino analog pin A0
 const int buttonPin = 8;  // non PWM pin
 const int ledPin = 2;     // the PWM pin the LED is attached to
 
+bool isTroubleshooting = false;
+
 int value;       // Store value from photoresistor (0-1023)
 float threshold; // Value has to be above this to trigger millis()
 int buttonState = LOW;
@@ -25,6 +27,8 @@ bool isThresholdTriggered = false;
 
 unsigned long startTime;
 unsigned long duration;
+
+bool PCReadyToRecieve = false;
 
 void setup()
 {
@@ -41,14 +45,21 @@ void loop()
   buttonState = digitalRead(buttonPin);
   // buttonState = HIGH;
 
-  // get button state
-  if (buttonState == HIGH)
+  // get button state if troubleshooting, and write to ledPin
+  if (isTroubleshooting)
   {
-    digitalWrite(ledPin, HIGH);
+    if (buttonState == HIGH)
+    {
+      digitalWrite(ledPin, HIGH);
+    }
+    else
+    {
+      digitalWrite(ledPin, LOW);
+    }
   }
   else
   {
-    digitalWrite(ledPin, LOW);
+    digitalWrite(ledPin, HIGH);
   }
 
   // capture the photoresistor reading
@@ -63,7 +74,8 @@ void loop()
 
   if (value <= threshold && isThresholdTriggered)
   {
-    duration = max(millis() - startTime, 20); // sets duration to at least 20 millis
+    duration = millis() - startTime;
+    duration = constrain(duration, 15, 1000); // constrains duration to at least 15 - 1000 millis
     isThresholdTriggered = false;
     DoSendMessage(duration); // Serial.println goes to PC
   }
