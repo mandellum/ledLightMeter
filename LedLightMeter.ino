@@ -36,7 +36,7 @@ void setup()
   pinMode(ledPin, OUTPUT);   // led , 8 pin as output
   pinMode(pResistor, INPUT); // Set pResistor - A0 pin as an input
   pinMode(buttonPin, INPUT); // Set button, non PWM pin 8 as input
-  threshold = 600;           // arbitrary threshold for now.
+  threshold = 250;           // arbitrary threshold for now.
 }
 
 void loop()
@@ -66,13 +66,13 @@ void loop()
   value = analogRead(pResistor);
   debugln(value);
 
-  if (value > threshold && !isThresholdTriggered)
+  if (value < threshold && !isThresholdTriggered) // is bright and hasn't yet been triggered
   {
     startTime = millis();
     isThresholdTriggered = true;
   }
 
-  if (value <= threshold && isThresholdTriggered)
+  if (value >= threshold && isThresholdTriggered) // is dark and threshold had been met already
   {
     duration = millis() - startTime;
     duration = constrain(duration, 15, 1000); // constrains duration to at least 15 - 1000 millis
