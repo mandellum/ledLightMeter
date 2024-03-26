@@ -15,51 +15,41 @@ The duration of time in which the photoresistor notices the light will be passed
 #endif
 
 const int pResistor = A0; // Photoresistor at Arduino analog pin A0
-const int buttonPin = 8;  // non PWM pin
-const int ledPin = 2;     // the PWM pin the LED is attached to
+const int buttonPin = 12; // non PWM pin
 
 bool isTroubleshooting = false;
 
 int value;       // Store value from photoresistor (0-1023)
 float threshold; // Value has to be above this to trigger millis()
-int buttonState = LOW;
+int buttonState = HIGH;
 bool isThresholdTriggered = false;
 
 unsigned long startTime;
 unsigned long duration;
 
-bool PCReadyToRecieve = false;
+bool isReset = false;
 
 void setup()
 {
   Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);   // led , 8 pin as output
-  pinMode(pResistor, INPUT); // Set pResistor - A0 pin as an input
-  pinMode(buttonPin, INPUT); // Set button, non PWM pin 8 as input
-  threshold = 250;           // arbitrary threshold for now.
+  pinMode(pResistor, INPUT);        // Set pResistor - A0 pin as an input
+  pinMode(buttonPin, INPUT_PULLUP); // Set reset button, non PWM pin 12 as input, normally HIGH, LOW on press
+  threshold = 250;                  // arbitrary threshold for now.
 }
 
 void loop()
 {
-
   buttonState = digitalRead(buttonPin);
-  // buttonState = HIGH;
 
-  // get button state if troubleshooting, and write to ledPin
-  if (isTroubleshooting)
+  if (buttonState = LOW && !isReset)
   {
-    if (buttonState == HIGH)
-    {
-      digitalWrite(ledPin, HIGH);
-    }
-    else
-    {
-      digitalWrite(ledPin, LOW);
-    }
+    DoSendResetMessage();
+    isReset = true;
   }
-  else
+
+  if (buttonState = HIGH && isReset)
   {
-    digitalWrite(ledPin, HIGH);
+    isReset = false;
   }
 
   // capture the photoresistor reading
@@ -77,12 +67,18 @@ void loop()
     duration = millis() - startTime;
     duration = constrain(duration, 15, 1000); // constrains duration to at least 15 - 1000 millis
     isThresholdTriggered = false;
-    DoSendMessage(duration); // Serial.println goes to PC
+    DoSendTime(duration); // Serial.println goes to PC
   }
 }
 
-void DoSendMessage(unsigned long time)
+void DoSendTime(unsigned long flashTime)
 {
-  Serial.println(time); // updates duration in milliseconds and outputs it to PC
+  Serial.println(flashTime); // updates duration in milliseconds and outputs it to PC
   debugln("Updating count to PC");
+}
+
+void DoSendResetMessage()
+{
+  Serial.println("RESET"); // updates duration in milliseconds and outputs it to PC
+  debugln("Telling PC to reset");
 }
