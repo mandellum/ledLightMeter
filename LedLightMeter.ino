@@ -2,9 +2,10 @@
 An Arduino-based prototype game controller, inspired by physical boxing simulator arcade installations.
 A physical slotted metal sheet will slide past an LED light, allowing a sliver of light to pass a photoresistor.
 The duration of time in which the photoresistor notices the light will be passed onto the PC via USB connection.
+A button is located under the foot of a table leg, and that controls when the game is to be reset.
 */
 
-#define DEBUG false // DEBUG false is Debug off, DEBUG true is Debug on
+#define DEBUG true // DEBUG false is Debug off, DEBUG true is Debug on
 
 #if DEBUG == true
 #define debug(x) Serial.print(x)
@@ -28,6 +29,7 @@ unsigned long startTime;
 unsigned long duration;
 
 bool isReset = false;
+bool isFlipping = false; // main state
 
 void setup()
 {
@@ -41,33 +43,37 @@ void loop()
 {
   buttonState = digitalRead(buttonPin);
 
-  if (buttonState = LOW && !isReset)
+  if (isFlipping)
   {
-    DoSendResetMessage();
-    isReset = true;
+    if (buttonState = LOW)
+    {
+      // reset when button is pressed and flipping
+      debugln("Button Pressed");
+      DoSendResetMessage();
+      isFlipping = false;
+    }
   }
 
-  if (buttonState = HIGH && isReset)
+  if (!isFlipping)
   {
-    isReset = false;
-  }
+    // capture the photoresistor reading
+    value = analogRead(pResistor);
+    // debugln(value);
 
-  // capture the photoresistor reading
-  value = analogRead(pResistor);
-  debugln(value);
+    if (value < threshold && !isThresholdTriggered) // is bright and hasn't yet been triggered
+    {
+      startTime = millis();
+      isThresholdTriggered = true;
+    }
 
-  if (value < threshold && !isThresholdTriggered) // is bright and hasn't yet been triggered
-  {
-    startTime = millis();
-    isThresholdTriggered = true;
-  }
-
-  if (value >= threshold && isThresholdTriggered) // is dark and threshold had been met already
-  {
-    duration = millis() - startTime;
-    duration = constrain(duration, 15, 1000); // constrains duration to at least 15 - 1000 millis
-    isThresholdTriggered = false;
-    DoSendTime(duration); // Serial.println goes to PC
+    if (value >= threshold && isThresholdTriggered) // is dark and threshold had been met already
+    {
+      duration = millis() - startTime;
+      duration = constrain(duration, 15, 1000); // constrains duration to at least 15 - 1000 millis
+      isThresholdTriggered = false;
+      DoSendTime(duration); // Serial.println goes to PC
+      isFlipping = true;
+    }
   }
 }
 
