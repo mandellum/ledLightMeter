@@ -5,7 +5,7 @@ The duration of time in which the photoresistor notices the light will be passed
 A button is located under the foot of a table leg, and that controls when the game is to be reset.
 */
 
-#define DEBUG true // DEBUG false is Debug off, DEBUG true is Debug on
+#define DEBUG false // DEBUG false is Debug off, DEBUG true is Debug on
 
 #if DEBUG == true
 #define debug(x) Serial.print(x)
