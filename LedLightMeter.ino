@@ -28,7 +28,7 @@ bool isThresholdTriggered = false;
 unsigned long startTime;
 unsigned long duration;
 
-bool isReset = false;
+// bool isReset = false;
 bool isFlipping = false; // main state
 
 void setup()
@@ -42,15 +42,15 @@ void setup()
 void loop()
 {
   buttonState = digitalRead(buttonPin);
+  // debugln(buttonState);
 
   if (isFlipping)
   {
-    if (buttonState = LOW)
+    if (buttonState == LOW)
     {
       // reset when button is pressed and flipping
       debugln("Button Pressed");
       DoSendResetMessage();
-      isFlipping = false;
     }
   }
 
@@ -69,10 +69,9 @@ void loop()
     if (value >= threshold && isThresholdTriggered) // is dark and threshold had been met already
     {
       duration = millis() - startTime;
-      duration = constrain(duration, 15, 1000); // constrains duration to at least 15 - 1000 millis
+      duration = constrain(duration, 5, 1000); // constrains duration to at least 5 - 1000 millis
       isThresholdTriggered = false;
-      DoSendTime(duration); // Serial.println goes to PC
-      isFlipping = true;
+      DoSendTime(duration);
     }
   }
 }
@@ -80,11 +79,17 @@ void loop()
 void DoSendTime(unsigned long flashTime)
 {
   Serial.println(flashTime); // updates duration in milliseconds and outputs it to PC
+  isFlipping = true;
+
   debugln("Updating count to PC");
+  // debugln("isFlipping = " + isFlipping);
 }
 
 void DoSendResetMessage()
 {
   Serial.println("RESET"); // updates duration in milliseconds and outputs it to PC
+  isFlipping = false;
+
   debugln("Telling PC to reset");
+  // debugln("isFlipping = " + isFlipping);
 }
